@@ -1,7 +1,8 @@
-# kicad.js v0.0.2
+# kicad.js v0.1.0
 # (c) 2015 Ricardo (XenGi) Band
 
 color = {}
+color['Fg'] = {'r': 255, 'g': 255, 'b': 255}
 color['Bg'] = {'r': 0, 'g': 0, 'b': 0}
 color['F.Cu'] = {'r': 132, 'g': 0, 'b': 0}
 color['B.Cu'] = {'r': 0, 'g': 132, 'b': 0}
@@ -23,6 +24,45 @@ color['F.Crtyd'] = {'r': 132, 'g': 132, 'b': 132}
 color['B.CrtYd'] = {'r': 0, 'g': 0, 'b': 0}
 color['F.Fab'] = {'r': 194, 'g': 194, 'b': 0}
 color['B.Fab'] = {'r': 132, 'g': 0, 'b': 0}
+
+draw_pad = (c, pad) ->
+    if pad['shape'] == 'circle'
+        c.beginPath()
+        # TODO: change circle to elipse and also use height
+        # or is width and height always the same with circles?
+        c.arc(pad['x'], pad['y'], pad['width'] / 2, 0, 2 * Math.PI, false)
+        c.fillStyle = "rgba(#{color['B.Mask']['r']},
+                            #{color['B.Mask']['g']},
+                            #{color['B.Mask']['b']},
+                            1)"
+        c.fill()
+    else if pad['shape'] == 'rect'
+        c.beginPath()
+        c.fillRect(pad['x'], pad['y'], pad['width'], pad['height'])
+        c.fillStyle = "rgba(#{color['B.Mask']['r']},
+                            #{color['B.Mask']['g']},
+                            #{color['B.Mask']['b']},
+                            1)"
+        c.fill()
+
+    if pad['type'] == 'thru_hole'
+        c.beginPath()
+        c.arc(pad['x'], pad['y'], pad['drill'] / 2, 0, 2 * Math.PI, false)
+        c.fillStyle = "rgba(#{color['Bg']['r']},
+                            #{color['Bg']['g']},
+                            #{color['Bg']['b']},
+                            1)"
+        c.fill()
+
+    c.beginPath()
+    c.textAlign = 'center'
+    c.textBaseline = 'middle'
+    c.fillStyle = "rgba(#{color['Fg']['r']},
+                        #{color['Fg']['g']},
+                        #{color['Fg']['b']},
+                        1)"
+    c.fillText(pad['num'], pad['x'], pad['y'])
+
 
 draw_line = (c, line) ->
     c.strokeStyle = "rgba(#{color[line['layer']]['r']},
@@ -102,8 +142,8 @@ draw_footprint = (canvas, data) ->
                 pad['shape'] = m[3]
                 pad['x'] = m[4]
                 pad['y'] = m[5]
-                pad['w'] = m[6]
-                pad['h'] = m[7]
+                pad['width'] = m[6]
+                pad['height'] = m[7]
                 pad['drill'] = m[8]
                 pad['layers'] = m[9].split(' ')
 
@@ -122,6 +162,7 @@ draw_footprint = (canvas, data) ->
         console.log("DEBUG: max dimensions: left=#{left}; right=#{right}; top=#{top}; bottom=#{bottom}")
         console.log("DEBUG: zoom: #{zoom}")
 
+        # draw fp_lines
         for line in fp_lines
             # translate coords
             line['x1'] = line['x1'] * zoom + cw
@@ -131,6 +172,15 @@ draw_footprint = (canvas, data) ->
             line['width'] *= zoom
             draw_line(context, line)
 
+        # draw pads
+        for pad in pads
+            pad['x'] = pad['x'] * zoom + cw
+            pad['y'] = pad['y'] * zoom + ch
+            pad['width'] *= zoom
+            pad['height'] *= zoom
+            pad['drill'] *= zoom
+
+            draw_pad(context, pad)
 
 # look for canvas elements with class kicad and draw them
 $ () ->
