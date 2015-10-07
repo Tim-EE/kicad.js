@@ -36,7 +36,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   - Drawing lines works
 
 
-[Unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.2...v0.1.0
-[0.0.2]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.1...v0.0.2
+[Unreleased]: https://github.com/xengi/kicad.js/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/xengi/kicad.js/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/xengi/kicad.js/compare/v0.0.2...v0.1.0
+[0.0.2]: https://github.com/xengi/kicad.js/compare/v0.0.1...v0.0.2
