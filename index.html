@@ -1,15 +1,45 @@
 <!DOCTYPE html>
 <html>
     <head>
+         <meta charset="UTF-8" />
         <title>kicad.js</title>
     </head>
     <body>
         <h1><img src="logo.png" /></h1>
-        <canvas class="kicad" data-kicad-footprint="/Teensy3.x_LC.kicad_mod" width="480" height="320"></canvas>
-        <canvas class="kicad" data-kicad-footprint="/Cherry_MX_Switch.kicad_mod" width="480" height="320"></canvas>
+        <canvas id="example1" data-footprint="/Teensy3.x_LC.kicad_mod" width="480" height="320"></canvas>
+        <canvas id="example2" data-footprint="/Cherry_MX_Switch.kicad_mod" width="480" height="320"></canvas>
+        <button id="zoomin">zoom in</button>
+        <button id="zoomout">zoom out</button>
 
         <script src="jquery-2.1.4.min.js"></script>
         <script src="kicad.js"></script>
+		<script>
+            (() => {
+                "use strict";
+
+                var options = {
+                    grid: 1.27
+                };
+
+                var canvas1 = $("#example1");
+                var example1 = new KiCad(canvas1[0], options);
+                Promise.resolve($.get(canvas1.data('footprint'))).then(data => {
+                    example1.render(data);
+                });
+
+                var canvas2 = $("#example2");
+                var example2 = new KiCad(canvas2[0]);
+                Promise.resolve($.get(canvas2.data('footprint'))).then(data => {
+                    example2.render(data);
+                });
+                $("#zoomin").on('click', () => {
+                    example2.zoom(+1);
+                });
+                $("#zoomout").on('click', () => {
+                    example2.zoom(-1);
+                });
+            })();
+        </script>
     </body>
 </html>
 

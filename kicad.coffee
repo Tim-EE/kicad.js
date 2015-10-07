@@ -1,142 +1,164 @@
 # kicad.js v0.1.0
 # (c) 2015 Ricardo (XenGi) Band
 
+defaults = {
+    'Fg': {'r': 255, 'g': 255, 'b': 255},
+    'Bg': {'r': 0, 'g': 0, 'b': 0},
+    'F.Cu': {'r': 132, 'g': 0, 'b': 0},
+    'B.Cu': {'r': 0, 'g': 132, 'b': 0},
+    'F.Adhes': {'r': 132, 'g': 0, 'b': 132},
+    'B.Adhes': {'r': 0, 'g': 0, 'b': 132},
+    'F.Paste': {'r': 132, 'g': 0, 'b': 0},
+    'B.Paste': {'r': 0, 'g': 194, 'b': 194},
+    'F.SilkS': {'r': 0, 'g': 132, 'b': 132},
+    'B.SilkS': {'r': 132, 'g': 0, 'b': 132},
+    'F.Mask': {'r': 132, 'g': 0, 'b': 132},
+    'B.Mask': {'r': 132, 'g': 132, 'b': 0},
+    'Dwgs.User': {'r': 194, 'g': 194, 'b': 194},
+    'Cmts.User': {'r': 0, 'g': 0, 'b': 132},
+    'Eco1.User': {'r': 0, 'g': 132, 'b': 0},
+    'Eco2.user': {'r': 194, 'g': 194, 'b': 0},
+    'Egde.Cuts': {'r': 194, 'g': 194, 'b': 0},
+    'Margin': {'r': 194, 'g': 0, 'b': 194},
+    'F.Crtyd': {'r': 132, 'g': 132, 'b': 132},
+    'B.CrtYd': {'r': 0, 'g': 0, 'b': 0},
+    'F.Fab': {'r': 194, 'g': 194, 'b': 0},
+    'B.Fab': {'r': 132, 'g': 0, 'b': 0},
+    'grid': 1.27
+}
 
-color = {}
-color['Fg'] = {'r': 255, 'g': 255, 'b': 255}
-color['Bg'] = {'r': 0, 'g': 0, 'b': 0}
-color['F.Cu'] = {'r': 132, 'g': 0, 'b': 0}
-color['B.Cu'] = {'r': 0, 'g': 132, 'b': 0}
-color['F.Adhes'] = {'r': 132, 'g': 0, 'b': 132}
-color['B.Adhes'] = {'r': 0, 'g': 0, 'b': 132}
-color['F.Paste'] = {'r': 132, 'g': 0, 'b': 0}
-color['B.Paste'] = {'r': 0, 'g': 194, 'b': 194}
-color['F.SilkS'] = {'r': 0, 'g': 132, 'b': 132}
-color['B.SilkS'] = {'r': 132, 'g': 0, 'b': 132}
-color['F.Mask'] = {'r': 132, 'g': 0, 'b': 132}
-color['B.Mask'] = {'r': 132, 'g': 132, 'b': 0}
-color['Dwgs.User'] = {'r': 194, 'g': 194, 'b': 194}
-color['Cmts.User'] = {'r': 0, 'g': 0, 'b': 132}
-color['Eco1.User'] = {'r': 0, 'g': 132, 'b': 0}
-color['Eco2.user'] = {'r': 194, 'g': 194, 'b': 0}
-color['Egde.Cuts'] = {'r': 194, 'g': 194, 'b': 0}
-color['Margin'] = {'r': 194, 'g': 0, 'b': 194}
-color['F.Crtyd'] = {'r': 132, 'g': 132, 'b': 132}
-color['B.CrtYd'] = {'r': 0, 'g': 0, 'b': 0}
-color['F.Fab'] = {'r': 194, 'g': 194, 'b': 0}
-color['B.Fab'] = {'r': 132, 'g': 0, 'b': 0}
-
-draw_grid = (c, size, w, h) ->
-    center_x = w / 2
-    center_y = h / 2
-    dots_x = parseInt(w / size)
-    dots_x += dots_x % 2
-    dots_y = parseInt(h / size)
-    dots_y += dots_y % 2
-    for x in [0..dots_x]
-        for y in [0..dots_y]
-            _x = x*size + center_x
-            _y = y*size + center_y
-            console.log("dot at #{_x},#{_y}")
-
-            c.beginPath()
-            c.strokeStyle = "rgba(132, 132, 132, 1)"
-            c.arc(_x - dots_x / 2 * size, _y - dots_y / 2 * size, 1, 0, 2 * Math.PI, false)
-            #c.lineWidth = 1
-            c.stroke()
-
-
-draw_fpline = (c, fpline) ->
-    c.strokeStyle = "rgba(#{color[fpline['layer']]['r']},
-                          #{color[fpline['layer']]['g']},
-                          #{color[fpline['layer']]['b']},
-                          1)"
-    c.lineWidth = fpline['width']
-    c.lineCap = 'square'
-    c.beginPath()
-    c.moveTo(fpline['x1'], fpline['y1'])
-    c.lineTo(fpline['x2'], fpline['y2'])
-    c.stroke()
-
-
-draw_fpcircle = (c, fpcircle) ->
-    c.beginPath()
-    c.strokeStyle = "rgba(#{color[fpcircle['layer']]['r']},
-                          #{color[fpcircle['layer']]['g']},
-                          #{color[fpcircle['layer']]['b']},
-                          1)"
-    c.arc(fpcircle['center_x'], fpcircle['center_y'], fpcircle['radius'], 0, 2 * Math.PI, false)
-    c.lineWidth = fpcircle['width']
-    c.stroke()
-
-
-draw_fparc = (c, fparc) ->
-    # TODO: implement me!
-    return
-
-
-draw_fptext = (c, fptext) ->
-    # TODO: implement me!
-    return
-
-
-draw_pad = (c, pad) ->
-    if pad['shape'] == 'circle'
-        c.beginPath()
-        c.arc(pad['x'], pad['y'], pad['width'] / 2, 0, 2 * Math.PI, false)
-        c.fillStyle = "rgba(#{color['B.Mask']['r']},
-                            #{color['B.Mask']['g']},
-                            #{color['B.Mask']['b']},
-                            1)"
-        c.fill()
-    #else if pad['shape'] == 'oval'
-        # TODO: implement me!
-        #c.beginPath()
-        #
-        #c.fillStyle = "rgba(#{color['B.Mask']['r']},
-        #                    #{color['B.Mask']['g']},
-        #                    #{color['B.Mask']['b']},
-        #                    1)"
-        #c.fill()
-    else if pad['shape'] == 'rect'
-        c.beginPath()
-        c.fillRect(pad['x'], pad['y'], pad['width'], pad['height'])
-        c.fillStyle = "rgba(#{color['B.Mask']['r']},
-                            #{color['B.Mask']['g']},
-                            #{color['B.Mask']['b']},
-                            1)"
-        c.fill()
-
-    if pad['type'] == 'thru_hole'
-        c.beginPath()
-        c.arc(pad['x'], pad['y'], pad['drill'] / 2, 0, 2 * Math.PI, false)
-        c.fillStyle = "rgba(#{color['Bg']['r']},
-                            #{color['Bg']['g']},
-                            #{color['Bg']['b']},
-                            1)"
-        c.fill()
-    #else if pad['type'] == 'np_thru_hole'
-        # TODO: implement me!
-    #else if pad['type'] == 'smd'
-        # TODO: implement me!
-
-    if pad['num'] != ''
-        c.beginPath()
-        c.textAlign = 'center'
-        c.textBaseline = 'middle'
-        c.fillStyle = "rgba(#{color['Fg']['r']},
-                            #{color['Fg']['g']},
-                            #{color['Fg']['b']},
-                            1)"
-        c.fillText(pad['num'], pad['x'], pad['y'])
-
-
-draw_footprint = (canvas, data) ->
+KiCad = (canvas, options = {}) ->
     if canvas.getContext
         context = canvas.getContext('2d')
+    else
+        throw("Can't get context of canvas.")
 
+    data = {}
+    zoom = 0
+
+    for key of defaults
+        options[key] = options[key] or defaults[key]
+
+    draw_grid = (size) ->
+        center_x = canvas.width / 2
+        center_y = canvas.height / 2
+        dots_x = parseInt(canvas.width / size)
+        dots_x += dots_x % 2  # make it an even number
+        dots_y = parseInt(canvas.height / size)
+        dots_y += dots_y % 2  # make it an even number
+        for x in [0..dots_x]
+            for y in [0..dots_y]
+                _x = x * size + center_x
+                _y = y * size + center_y
+
+                context.beginPath()
+                context.strokeStyle = "rgba(132, 132, 132, 1)"
+                # here the even numbers for x and y are important
+                context.fillRect(_x - dots_x / 2 * size, _y - dots_y / 2 * size, 1, 1)
+                #context.arc(_x - dots_x / 2 * size, _y - dots_y / 2 * size, 0.5, 0, 2 * Math.PI)
+                #context.fill()
+                context.stroke()
+
+
+    draw_fpline = (fpline) ->
+        context.strokeStyle = "rgba(#{options[fpline['layer']]['r']},
+                                    #{options[fpline['layer']]['g']},
+                                    #{options[fpline['layer']]['b']},
+                                    1)"
+        context.lineWidth = fpline['width']
+        context.lineCap = 'square'
+        context.beginPath()
+        context.moveTo(fpline['x1'], fpline['y1'])
+        context.lineTo(fpline['x2'], fpline['y2'])
+        context.stroke()
+
+
+    draw_fpcircle = (fpcircle) ->
+        context.beginPath()
+        context.strokeStyle = "rgba(#{options[fpcircle['layer']]['r']},
+                                    #{options[fpcircle['layer']]['g']},
+                                    #{options[fpcircle['layer']]['b']},
+                                    1)"
+        context.arc(fpcircle['center_x'], fpcircle['center_y'], fpcircle['radius'], 0, 2 * Math.PI, false)
+        context.lineWidth = fpcircle['width']
+        context.stroke()
+
+
+    draw_fparc = (fparc) ->
+        dx = fparc['point_x'] - fparc['center_x']
+        dy = fparc['point_y'] - fparc['center_y']
+        start_angle = Math.atan2(dy, dx)
+        end_angle = start_angle + fparc['angle'] * Math.PI / 180
+
+        context.beginPath()
+        context.strokeStyle = "rgba(#{options[fparc['layer']]['r']},
+                                    #{options[fparc['layer']]['g']},
+                                    #{options[fparc['layer']]['b']},
+                                    1)"
+        context.arc(fparc['center_x'], fparc['center_y'], fparc['radius'], start_angle, end_angle, false)
+        context.lineWidth = fparc['width']
+        context.stroke()
+
+
+    draw_fptext = (fptext) ->
+        # TODO: implement me!
+        return
+
+
+    draw_pad = (pad) ->
+        if pad['shape'] == 'circle'
+            context.beginPath()
+            context.arc(pad['x'], pad['y'], pad['width'] / 2, 0, 2 * Math.PI, false)
+            context.fillStyle = "rgba(#{options['B.Mask']['r']},
+                                      #{options['B.Mask']['g']},
+                                      #{options['B.Mask']['b']},
+                                      1)"
+            context.fill()
+        #else if pad['shape'] == 'oval'
+            # TODO: implement me!
+            #context.beginPath()
+            #
+            #context.fillStyle = "rgba(#{options['B.Mask']['r']},
+            #                          #{options['B.Mask']['g']},
+            #                          #{options['B.Mask']['b']},
+            #                          1)"
+            #context.fill()
+        else if pad['shape'] == 'rect'
+            context.beginPath()
+            context.fillRect(pad['x'], pad['y'], pad['width'], pad['height'])
+            context.fillStyle = "rgba(#{options['B.Mask']['r']},
+                                      #{options['B.Mask']['g']},
+                                      #{options['B.Mask']['b']},
+                                      1)"
+            context.fill()
+
+        if pad['type'] == 'thru_hole'
+            context.beginPath()
+            context.arc(pad['x'], pad['y'], pad['drill'] / 2, 0, 2 * Math.PI, false)
+            context.fillStyle = "rgba(#{options['Bg']['r']},
+                                      #{options['Bg']['g']},
+                                      #{options['Bg']['b']},
+                                      1)"
+            context.fill()
+        #else if pad['type'] == 'np_thru_hole'
+            # TODO: implement me!
+        #else if pad['type'] == 'smd'
+            # TODO: implement me!
+
+        if pad['num'] != ''
+            context.beginPath()
+            context.textAlign = 'center'
+            context.textBaseline = 'middle'
+            context.fillStyle = "rgba(#{options['Fg']['r']},
+                                      #{options['Fg']['g']},
+                                      #{options['Fg']['b']},
+                                      1)"
+            context.fillText(pad['num'], pad['x'], pad['y'])
+
+
+    draw_footprint = () ->
         # draw background
-        context.fillStyle = "rgb(#{color['Bg']['r']}, #{color['Bg']['g']}, #{color['Bg']['b']})"
+        context.fillStyle = "rgb(#{options['Bg']['r']}, #{options['Bg']['g']}, #{options['Bg']['b']})"
         context.fillRect(0, 0, canvas.width, canvas.height)
 
         # set outer boundaries of pretty file
@@ -186,10 +208,33 @@ draw_footprint = (canvas, data) ->
 
                 fp_lines.push(fp_line)
 
+            regex_fparc = /\(fp_arc\ \(start\ ([-.\d]*)\ ([-.\d]*)\)\ \(end\ ([-.\d]*)\ ([-.\d]*)\)\ \(angle\ ([-.\d]*)\)\ \(layer\ ([.a-zA-Z]*)\)\ \(width\ ([-.\d]*)\)\)/g
+            while((m = regex_fparc.exec(l)) != null)
+                if(m.index == regex_fparc.lastIndex)
+                    regex_fparc.lastIndex++
+
+                fp_arc = {}
+                fp_arc['center_x'] = parseFloat(m[1])
+                fp_arc['center_y'] = parseFloat(m[2])
+                fp_arc['point_x'] = parseFloat(m[3])
+                fp_arc['point_y'] = parseFloat(m[4])
+                fp_arc['radius'] = Math.sqrt(Math.pow(fp_arc['center_x'] - fp_arc['point_x'], 2) +
+                                             Math.pow(fp_arc['center_y'] - fp_arc['point_y'], 2))
+                fp_arc['angle'] = parseFloat(m[5])
+                fp_arc['layer'] = m[6]
+                fp_arc['width'] = parseFloat(m[7])
+
+                update_dimensions(fp_arc['center_x'] - fp_arc['radius'],
+                                  fp_arc['center_y'] - fp_arc['radius'])
+                update_dimensions(fp_arc['center_x'] + fp_arc['radius'],
+                                  fp_arc['center_y'] + fp_arc['radius'])
+
+                fp_arcs.push(fp_arc)
+
 
             regex_fpcircle = /\(fp_circle\ \(center\ ([-.\d]+)\ ([-.\d]+)\)\ \(end\ ([-.\d]+)\ ([-.\d]+)\)\ \(layer\ ([.\w]+)\)\ \(width\ ([.\d]+)\)\)/g
             while((m = regex_fpcircle.exec(l)) != null)
-                if(m.index == regex_fpcircle.astIndex)
+                if(m.index == regex_fpcircle.lastIndex)
                     regex_fpcircle.lastIndex++
 
                 fp_circle = {}
@@ -212,7 +257,7 @@ draw_footprint = (canvas, data) ->
 
             regex_pad = /\(pad\ ([\d]*)\ ([_a-z]*)\ ([a-z]*)\ \(at\ ([-.\d]*)\ ([-.\d]*)\)\ \(size\ ([.\d]*)\ ([.\d]*)\)\ \(drill\ ([.\d]*)\)\ \(layers\ ([\w\d\s\.\*]*)\)\)/g
             while((m = regex_pad.exec(l)) != null)
-            # TODO: forgot what the next 2 lines do..
+                # TODO: forgot what the next 2 lines do..
                 if (m.index == regex_pad.lastIndex)
                     regex_pad.lastIndex++
 
@@ -247,14 +292,15 @@ draw_footprint = (canvas, data) ->
         ch = canvas.height / 2
         maxw = Math.max(Math.abs(left), Math.abs(right))
         maxh = Math.max(Math.abs(top), Math.abs(bottom))
-        zoom = Math.min((cw - 10) / maxw, (ch - 10) / maxh)
+        if not zoom
+            zoom = Math.min((cw - 10) / maxw, (ch - 10) / maxh)
 
         console.log("DEBUG: max dimensions: left=#{left}; right=#{right}; top=#{top}; bottom=#{bottom}")
         console.log("DEBUG: zoom: #{zoom}")
 
 
         # draw everything
-        draw_grid(context, 1.27 * zoom, canvas.width, canvas.height)
+        draw_grid(options['grid'] * zoom)
 
         for fpline in fp_lines
             # translate coords
@@ -263,39 +309,60 @@ draw_footprint = (canvas, data) ->
             fpline['x2'] = fpline['x2'] * zoom + cw
             fpline['y2'] = fpline['y2'] * zoom + ch
             fpline['width'] *= zoom
-            draw_fpline(context, fpline)
+            draw_fpline(fpline)
 
         for fpcircle in fp_circles
+            # translate coords
             fpcircle['center_x'] = fpcircle['center_x'] * zoom + cw
             fpcircle['center_y'] = fpcircle['center_y'] * zoom + ch
             fpcircle['radius'] *= zoom
             fpcircle['width'] *= zoom
-            draw_fpcircle(context, fpcircle)
+            draw_fpcircle(fpcircle)
 
         for fparc in fp_arcs
-            #fparc['center_x'] = fparc['center_x'] * zoom + cw
-            #fparc['center_y'] = fparc['center_y'] * zoom + ch
-            #fparc['width'] *= zoom
-            draw_fparc(context, fparc)
+            # translate coords
+            fparc['center_x'] = fparc['center_x'] * zoom + cw
+            fparc['center_y'] = fparc['center_y'] * zoom + ch
+            fparc['point_x'] = fparc['point_x'] * zoom + cw
+            fparc['point_y'] = fparc['point_y'] * zoom + ch
+            fparc['width'] *= zoom
+            fparc['radius'] *= zoom
+            draw_fparc(fparc)
 
         for fptext in fp_texts
+            # translate coords
             #fptext['center_x'] = fptext['center_x'] * zoom + cw
             #fptext['center_y'] = fptext['center_y'] * zoom + ch
             #fptext['width'] *= zoom
-            draw_fptext(context, fptext)
+            draw_fptext(fptext)
 
         for pad in pads
+            # translate coords
             pad['x'] = pad['x'] * zoom + cw
             pad['y'] = pad['y'] * zoom + ch
             pad['width'] *= zoom
             pad['height'] *= zoom
             pad['drill'] *= zoom
-            draw_pad(context, pad)
+            draw_pad(pad)
 
-# look for canvas elements with class kicad and draw them
-$ () ->
-    $('canvas.kicad').each (i, val) ->
-        if $(this).attr('data-kicad-footprint')
-            $.get $(this).attr('data-kicad-footprint'), (data) ->
-                draw_footprint(val, data)
+    this.render = (footprint) ->
+        data = footprint
+        draw_footprint()
+
+    this.zoom = (level) ->
+        zoom = zoom + level
+        draw_footprint()
+
+    return this
+
+
+if typeof(define) != 'undefined'
+    define 'kicad', [], () ->
+        return KiCad
+else if typeof(module) != 'undefined' && typeof(module.exports) != 'undefined'
+    module.exports = KiCad
+else if window
+    window.KiCad = KiCad
+else if global
+    global.KiCad = KiCad
 
