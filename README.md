@@ -11,28 +11,74 @@ at [coffeescript.org](http://coffeescript.org/).
 
 ## Installation
 
-Just put kicad.js where you usually put your JavaScript files. You will also
-need [jQuery](http://coffeescript.org/) v2.1.4 or later. I haven't tested any
-earlier versions. Maybe they work too.
+Just put kicad.js where you usually put your JavaScript files.
 
 ## Usage
 
 Here's a simple snippet that shows how to use kicad.js:
 
 ```
-<canvas class="kicad" data-kicad-footprint="/Teensy3.x_LC.kicad_mod" width="480" height="320"></canvas>
+<canvas id="kicad" data-footprint="/Teensy3.x_LC.kicad_mod" width="480" height="320"></canvas>
 
 <script src="jquery-2.1.4.min.js"></script>
 <script src="kicad.js"></script>
+<script>
+	(() => {
+		"use strict";
+
+		var options = {
+        	grid: 1.27
+        };
+
+        var canvas = $("#kicad");
+
+        var kicadviewer = new KiCad(canvas[0], options);
+
+        Promise.resolve($.get(canvas.data('footprint'))).then(data => {
+            kicadviewer.render(data);
+        });
+
+    })();
+</script>
 ```
 
-First you need to create a `<canvas>` element somewhere. Give it the class
-`kicad` and add a data attribute containing the url to the footprint file. Then
-preferebly at the bottom of the page load jQuery and the kicad.js file.
-KiCAD.js looks automatically for canvas elements with the class `kicad` and draws
-the footprint files in the dtaa attribute. This is done with an asynchronous
-AJAX call.
+First you need to create a `<canvas>` element somewhere. Give it an id and a
+data attribute holding the url to the footprint file. Then preferebly at the
+bottom of the page load the kicad.js file.
+After that make another `<script>` block.
+
+You can set options to define grid size and colors for the footprint.
+
+```
+var options = {
+    grid: 1.27
+};
+```
+
+Then you need to find the canvas element for example with jQuery.
+
+```
+var canvas = $("#kicad");
+```
+
+You can then create a KiCad object and attach it to the canvas with your set of
+options. note that jQuery always returns a list of found elements, so you need
+to give it the first item in the list.
+
+```
+var kicadviewer = new KiCad(canvas[0], options);
+```
+
+Finally download the footprint file for example with an AJAX call and use the
+`render(data)` function of your KiCad object to render the footprint.
+
+```
+Promise.resolve($.get(canvas.data('footprint'))).then(data => {
+    kicadviewer.render(data);
+});
+```
 
 If everything works it should look like this:
 
 ![screenshot](https://github.com/xengi/kicad.js/raw/master/screenshot.png "Screenshot")
+
