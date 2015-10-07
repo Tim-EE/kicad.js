@@ -1,4 +1,4 @@
-# kicad.js v0.1.0
+# kicad.js v0.2.0
 # (c) 2015 Ricardo (XenGi) Band
 
 defaults = {
