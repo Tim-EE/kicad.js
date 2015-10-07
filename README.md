@@ -1,6 +1,6 @@
 # kicad.js
 
-kicad footprint viewer
+kicad.js is a footprint viewer for [KiCAD](http://kicad-pcb.org/) footprint files.
 
 ## Compilation
 
@@ -20,26 +20,19 @@ earlier versions. Maybe they work too.
 Here's a simple snippet that shows how to use kicad.js:
 
 ```
-<canvas id="kicadviewer" width="480" height="320"></canvas>
+<canvas class="kicad" data-kicad-footprint="/Teensy3.x_LC.kicad_mod" width="480" height="320"></canvas>
 
+<script src="jquery-2.1.4.min.js"></script>
 <script src="kicad.js"></script>
-<script>
-$(function() {
-    $.get('/Teensy3.x_LC.kicad_mod', function(data) {
-        draw_kicad('kicad', data);
-    });
-});
-</script>
 ```
 
-First you need to create a `<canvas>` element somewhere. Give it an id. Then
-preferebly at the bottom of the page load the kicad.js file. After that make
-another `<script>` block where you load the actual kicad footprint file -
-usually ends with .kicad_mod and load it into a string. In this example this is
-done with an asynchronous AJAX call.
-
-Finally call the `draw_kicad(element, data)` function with the id of the
-element to draw on and the footprint file as a string.
+First you need to create a `<canvas>` element somewhere. Give it the class
+`kicad` and add a data attribute containing the url to the footprint file. Then
+preferebly at the bottom of the page load jQuery and the kicad.js file.
+KiCAD.js looks automatically for canvas elements with the class `kicad` and draws
+the footprint files in the dtaa attribute. This is done with an asynchronous
+AJAX call.
 
 If everything works it should look like this:
 
+![screenshot](https://github.com/xengi/kicad.js/raw/master/screenshot.png "Screenshot")
