@@ -17,7 +17,7 @@ Just put kicad.js where you usually put your JavaScript files.
 
 Here's a simple snippet that shows how to use kicad.js:
 
-```
+```html
 <canvas id="kicad" data-footprint="/Teensy3.x_LC.kicad_mod" width="480" height="320"></canvas>
 
 <script src="jquery-2.1.4.min.js"></script>
@@ -49,7 +49,7 @@ After that make another `<script>` block.
 
 You can set options to define grid size and colors for the footprint.
 
-```
+```javascript
 var options = {
     grid: 1.27
 };
@@ -57,7 +57,7 @@ var options = {
 
 Then you need to find the canvas element for example with jQuery.
 
-```
+```javascript
 var canvas = $("#kicad");
 ```
 
@@ -65,14 +65,14 @@ You can then create a KiCad object and attach it to the canvas with your set of
 options. note that jQuery always returns a list of found elements, so you need
 to give it the first item in the list.
 
-```
+```javascript
 var kicadviewer = new KiCad(canvas[0], options);
 ```
 
 Finally download the footprint file for example with an AJAX call and use the
 `render(data)` function of your KiCad object to render the footprint.
 
-```
+```javascript
 Promise.resolve($.get(canvas.data('footprint'))).then(data => {
     kicadviewer.render(data);
 });
