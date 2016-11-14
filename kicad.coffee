@@ -1,73 +1,88 @@
 # kicad.js v0.2.0
 # (c) 2015 Ricardo (XenGi) Band
 
-defaults = {
-    'Fg': {'r': 255, 'g': 255, 'b': 255},
-    'Bg': {'r': 0, 'g': 0, 'b': 0},
-    'F.Cu': {'r': 132, 'g': 0, 'b': 0},
-    'B.Cu': {'r': 0, 'g': 132, 'b': 0},
-    'F.Adhes': {'r': 132, 'g': 0, 'b': 132},
-    'B.Adhes': {'r': 0, 'g': 0, 'b': 132},
-    'F.Paste': {'r': 132, 'g': 0, 'b': 0},
-    'B.Paste': {'r': 0, 'g': 194, 'b': 194},
-    'F.SilkS': {'r': 0, 'g': 132, 'b': 132},
-    'B.SilkS': {'r': 132, 'g': 0, 'b': 132},
-    'F.Mask': {'r': 132, 'g': 0, 'b': 132},
-    'B.Mask': {'r': 132, 'g': 132, 'b': 0},
-    'Dwgs.User': {'r': 194, 'g': 194, 'b': 194},
-    'Cmts.User': {'r': 0, 'g': 0, 'b': 132},
-    'Eco1.User': {'r': 0, 'g': 132, 'b': 0},
-    'Eco2.user': {'r': 194, 'g': 194, 'b': 0},
-    'Egde.Cuts': {'r': 194, 'g': 194, 'b': 0},
-    'Margin': {'r': 194, 'g': 0, 'b': 194},
-    'F.Crtyd': {'r': 132, 'g': 132, 'b': 132},
-    'B.CrtYd': {'r': 0, 'g': 0, 'b': 0},
-    'F.Fab': {'r': 194, 'g': 194, 'b': 0},
-    'B.Fab': {'r': 132, 'g': 0, 'b': 0},
-    'grid': 1.27
-}
 
 KiCad = (canvas, options = {}) ->
+    # default colors taken form KiCAD
+    defaults = {
+        'Fg': {'r': 255, 'g': 255, 'b': 255},
+        'Bg': {'r': 0, 'g': 0, 'b': 0},
+        'F.Cu': {'r': 132, 'g': 0, 'b': 0},
+        'B.Cu': {'r': 0, 'g': 132, 'b': 0},
+        'F.Adhes': {'r': 132, 'g': 0, 'b': 132},
+        'B.Adhes': {'r': 0, 'g': 0, 'b': 132},
+        'F.Paste': {'r': 132, 'g': 0, 'b': 0},
+        'B.Paste': {'r': 0, 'g': 194, 'b': 194},
+        'F.SilkS': {'r': 0, 'g': 132, 'b': 132},
+        'B.SilkS': {'r': 132, 'g': 0, 'b': 132},
+        'F.Mask': {'r': 132, 'g': 0, 'b': 132},
+        'B.Mask': {'r': 132, 'g': 132, 'b': 0},
+        'Dwgs.User': {'r': 194, 'g': 194, 'b': 194},
+        'Cmts.User': {'r': 0, 'g': 0, 'b': 132},
+        'Eco1.User': {'r': 0, 'g': 132, 'b': 0},
+        'Eco2.user': {'r': 194, 'g': 194, 'b': 0},
+        'Egde.Cuts': {'r': 194, 'g': 194, 'b': 0},
+        'Margin': {'r': 194, 'g': 0, 'b': 194},
+        'F.Crtyd': {'r': 132, 'g': 132, 'b': 132},
+        'B.CrtYd': {'r': 0, 'g': 0, 'b': 0},
+        'F.Fab': {'r': 194, 'g': 194, 'b': 0},
+        'B.Fab': {'r': 132, 'g': 0, 'b': 0},
+        'grid': 1.27,
+        'grid_color': {'r': 132, 'g': 132, 'b': 132}
+    }
+
     if canvas.getContext
         context = canvas.getContext('2d')
     else
-        throw("Can't get context of canvas.")
+        throw('Can\'t get context of canvas.')
 
+    # holds the kicad file
     data = {}
+    # zoom level
     zoom = 0
+    default_zoom = 0
+    # x and y translation
+    move_x = 0
+    move_y = 0
 
+    # fill options with defaults where no option was given by the user
     for key of defaults
         options[key] = options[key] or defaults[key]
 
     draw_grid = (size) ->
+        # we need the center for alignment
         center_x = canvas.width / 2
         center_y = canvas.height / 2
+        # find out how many dots fit in the canvas
         dots_x = parseInt(canvas.width / size)
         dots_x += dots_x % 2  # make it an even number
         dots_y = parseInt(canvas.height / size)
         dots_y += dots_y % 2  # make it an even number
+
         for x in [0..dots_x]
             for y in [0..dots_y]
-                _x = x * size + center_x
-                _y = y * size + center_y
-
-                context.beginPath()
-                context.strokeStyle = "rgba(132, 132, 132, 1)"
-                # here the even numbers for x and y are important
-                context.fillRect(_x - dots_x / 2 * size, _y - dots_y / 2 * size, 1, 1)
-                #context.arc(_x - dots_x / 2 * size, _y - dots_y / 2 * size, 0.5, 0, 2 * Math.PI)
-                #context.fill()
-                context.stroke()
+                # here the even numbers for x and y are important.
+                # draw the dots starting from the top left corner by moving the center half way left and up.
+                # you understand it if you stare at the code for 5 mins.
+                px = (x * size + center_x) - (dots_x / 2 * size) + move_x
+                py = (y * size + center_y) - (dots_y / 2 * size) + move_y
+                # check if the dot is in the canvas (visible)
+                if px > 0 and px < canvas.width and py > 0 and py < canvas.height
+                    context.fillStyle = "rgba(#{options['grid_color']['r']},
+                                              #{options['grid_color']['g']},
+                                              #{options['grid_color']['b']},
+                                              1)"
+                    context.fillRect(px, py, 1, 1)
 
 
     draw_fpline = (fpline) ->
+        context.beginPath()
         context.strokeStyle = "rgba(#{options[fpline['layer']]['r']},
                                     #{options[fpline['layer']]['g']},
                                     #{options[fpline['layer']]['b']},
                                     1)"
         context.lineWidth = fpline['width']
         context.lineCap = 'square'
-        context.beginPath()
         context.moveTo(fpline['x1'], fpline['y1'])
         context.lineTo(fpline['x2'], fpline['y2'])
         context.stroke()
@@ -79,8 +94,8 @@ KiCad = (canvas, options = {}) ->
                                     #{options[fpcircle['layer']]['g']},
                                     #{options[fpcircle['layer']]['b']},
                                     1)"
-        context.arc(fpcircle['center_x'], fpcircle['center_y'], fpcircle['radius'], 0, 2 * Math.PI, false)
         context.lineWidth = fpcircle['width']
+        context.arc(fpcircle['center_x'], fpcircle['center_y'], fpcircle['radius'], 0, 2 * Math.PI, false)
         context.stroke()
 
 
@@ -95,8 +110,8 @@ KiCad = (canvas, options = {}) ->
                                     #{options[fparc['layer']]['g']},
                                     #{options[fparc['layer']]['b']},
                                     1)"
-        context.arc(fparc['center_x'], fparc['center_y'], fparc['radius'], start_angle, end_angle, false)
         context.lineWidth = fparc['width']
+        context.arc(fparc['center_x'], fparc['center_y'], fparc['radius'], start_angle, end_angle, false)
         context.stroke()
 
 
@@ -108,11 +123,11 @@ KiCad = (canvas, options = {}) ->
     draw_pad = (pad) ->
         if pad['shape'] == 'circle'
             context.beginPath()
-            context.arc(pad['x'], pad['y'], pad['width'] / 2, 0, 2 * Math.PI, false)
             context.fillStyle = "rgba(#{options['B.Mask']['r']},
                                       #{options['B.Mask']['g']},
                                       #{options['B.Mask']['b']},
                                       1)"
+            context.arc(pad['x'], pad['y'], pad['width'] / 2, 0, 2 * Math.PI, false)
             context.fill()
         #else if pad['shape'] == 'oval'
             # TODO: implement me!
@@ -124,21 +139,19 @@ KiCad = (canvas, options = {}) ->
             #                          1)"
             #context.fill()
         else if pad['shape'] == 'rect'
-            context.beginPath()
-            context.fillRect(pad['x'], pad['y'], pad['width'], pad['height'])
             context.fillStyle = "rgba(#{options['B.Mask']['r']},
                                       #{options['B.Mask']['g']},
                                       #{options['B.Mask']['b']},
                                       1)"
-            context.fill()
+            context.fillRect(pad['x'] - pad['width'] / 2, pad['y'] - pad['height'] / 2, pad['width'], pad['height'])
 
         if pad['type'] == 'thru_hole'
             context.beginPath()
-            context.arc(pad['x'], pad['y'], pad['drill'] / 2, 0, 2 * Math.PI, false)
             context.fillStyle = "rgba(#{options['Bg']['r']},
                                       #{options['Bg']['g']},
                                       #{options['Bg']['b']},
                                       1)"
+            context.arc(pad['x'], pad['y'], pad['drill'] / 2, 0, 2 * Math.PI, false)
             context.fill()
         #else if pad['type'] == 'np_thru_hole'
             # TODO: implement me!
@@ -158,7 +171,9 @@ KiCad = (canvas, options = {}) ->
 
     draw_footprint = () ->
         # draw background
-        context.fillStyle = "rgb(#{options['Bg']['r']}, #{options['Bg']['g']}, #{options['Bg']['b']})"
+        context.fillStyle = "rgb(#{options['Bg']['r']},
+                                 #{options['Bg']['g']},
+                                 #{options['Bg']['b']})"
         context.fillRect(0, 0, canvas.width, canvas.height)
 
         # set outer boundaries of pretty file
@@ -186,43 +201,29 @@ KiCad = (canvas, options = {}) ->
 
         # read pretty file
         prettylines = data.split('\n')
-        for l in prettylines
-            l = l.trim()
+        for line in prettylines
+            line = line.trim()
 
-            regex_fpline = /\(fp_line\ \(start\ ([-.\d]*)\ ([-.\d]*)\)\ \(end\ ([-.\d]*)\ ([-.\d]*)\)\ \(layer\ ([.a-zA-Z]*)\)\ \(width\ ([-.\d]*)\)\)/g
-            while (m = regex_fpline.exec(l)) != null
+            regex_fpline = /\(fp_line \(start ([-.\d]*) ([-.\d]*)\) \(end ([-.\d]*) ([-.\d]*)\) \(layer ([.a-zA-Z]*)\) \(width ([-.\d]*)\)\)/g
+            while (m = regex_fpline.exec(line)) != null
             # TODO: forgot what the next 2 lines do..
                 if m.index == regex_fpline.lastIndex
                     regex_fpline.lastIndex++
 
-                fp_line = {}
-                fp_line['x1'] = parseFloat(m[1])
-                fp_line['y1'] = parseFloat(m[2])
-                fp_line['x2'] = parseFloat(m[3])
-                fp_line['y2'] = parseFloat(m[4])
-                fp_line['layer'] = m[5]
-                fp_line['width'] = parseFloat(m[6])
+                fp_line = {x1: parseFloat(m[1]), y1: parseFloat(m[2]), x2: parseFloat(m[3]), y2: parseFloat(m[4]), layer: m[5], width:parseFloat(m[6])}
 
                 update_dimensions(fp_line['x1'], fp_line['y1'])
                 update_dimensions(fp_line['x2'], fp_line['y2'])
 
                 fp_lines.push(fp_line)
 
-            regex_fparc = /\(fp_arc\ \(start\ ([-.\d]*)\ ([-.\d]*)\)\ \(end\ ([-.\d]*)\ ([-.\d]*)\)\ \(angle\ ([-.\d]*)\)\ \(layer\ ([.a-zA-Z]*)\)\ \(width\ ([-.\d]*)\)\)/g
-            while (m = regex_fparc.exec(l)) != null
+            regex_fparc = /\(fp_arc \(start ([-.\d]*) ([-.\d]*)\) \(end ([-.\d]*) ([-.\d]*)\) \(angle ([-.\d]*)\) \(layer ([.a-zA-Z]*)\) \(width ([-.\d]*)\)\)/g
+            while (m = regex_fparc.exec(line)) != null
                 if m.index == regex_fparc.lastIndex
                     regex_fparc.lastIndex++
 
-                fp_arc = {}
-                fp_arc['center_x'] = parseFloat(m[1])
-                fp_arc['center_y'] = parseFloat(m[2])
-                fp_arc['point_x'] = parseFloat(m[3])
-                fp_arc['point_y'] = parseFloat(m[4])
-                fp_arc['radius'] = Math.sqrt(Math.pow(fp_arc['center_x'] - fp_arc['point_x'], 2) +
-                                             Math.pow(fp_arc['center_y'] - fp_arc['point_y'], 2))
-                fp_arc['angle'] = parseFloat(m[5])
-                fp_arc['layer'] = m[6]
-                fp_arc['width'] = parseFloat(m[7])
+                radius = Math.sqrt(Math.pow(parseFloat(m[1]) - parseFloat(m[3]), 2) + Math.pow(parseFloat(m[2]) - parseFloat(m[4]), 2))
+                fp_arc = {center_x: parseFloat(m[1]), center_y: parseFloat(m[2]), point_x: parseFloat(m[3]), point_y: parseFloat(m[4]), radius: radius, angle: parseFloat(m[5]), layer: m[6], width: parseFloat(m[7])}
 
                 update_dimensions(fp_arc['center_x'] - fp_arc['radius'],
                                   fp_arc['center_y'] - fp_arc['radius'])
@@ -231,53 +232,40 @@ KiCad = (canvas, options = {}) ->
 
                 fp_arcs.push(fp_arc)
 
-
-            regex_fpcircle = /\(fp_circle\ \(center\ ([-.\d]+)\ ([-.\d]+)\)\ \(end\ ([-.\d]+)\ ([-.\d]+)\)\ \(layer\ ([.\w]+)\)\ \(width\ ([.\d]+)\)\)/g
-            while (m = regex_fpcircle.exec(l)) != null
+            regex_fpcircle = /\(fp_circle \(center ([-.\d]+) ([-.\d]+)\) \(end ([-.\d]+) ([-.\d]+)\) \(layer ([.\w]+)\) \(width ([.\d]+)\)\)/g
+            while (m = regex_fpcircle.exec(line)) != null
                 if m.index == regex_fpcircle.lastIndex
                     regex_fpcircle.lastIndex++
 
-                fp_circle = {}
-                fp_circle['center_x'] = parseFloat(m[1])
-                fp_circle['center_y'] = parseFloat(m[2])
                 x = parseFloat(m[3])
                 y = parseFloat(m[4])
-                fp_circle['radius'] = Math.sqrt(Math.pow(fp_circle['center_x'] - x, 2) +
-                                                Math.pow(fp_circle['center_y'] - y, 2))
-                fp_circle['layer'] = m[5]
-                fp_circle['width'] = parseFloat(m[6])
+                radius = Math.sqrt(Math.pow(parseFloat(m[1]) - x, 2) + Math.pow(parseFloat(m[2]) - y, 2))
+                fp_circle = {center_x: parseFloat(m[1]), center_y: parseFloat(m[2]), radius: radius layer: m[5], width: parseFloat(m[6])}
 
                 update_dimensions(fp_circle['center_x'] - fp_circle['radius'],
-                                  fp_circle['center_y'] - fp_circle['radius'])
+                                fp_circle['center_y'] - fp_circle['radius'])
                 update_dimensions(fp_circle['center_x'] + fp_circle['radius'],
-                                  fp_circle['center_y'] + fp_circle['radius'])
+                                fp_circle['center_y'] + fp_circle['radius'])
 
                 fp_circles.push(fp_circle)
 
 
-            regex_pad = /\(pad\ ([\d]*)\ ([_a-z]*)\ ([a-z]*)\ \(at\ ([-.\d]*)\ ([-.\d]*)\)\ \(size\ ([.\d]*)\ ([.\d]*)\)\ \(drill\ ([.\d]*)\)\ \(layers\ ([\w\d\s\.\*]*)\)\)/g
-            while (m = regex_pad.exec(l)) != null
+            regex_pad = /\(pad ([\d]*) ([_a-z]*) ([a-z]*) \(at ([-.\d]*) ([-.\d]*)\) \(size ([.\d]*) ([.\d]*)\) \(drill ([.\d]*)\) \(layers ([\w\d\s.*]*)\)\)/g
+            while (m = regex_pad.exec(line)) != null
                 # TODO: forgot what the next 2 lines do..
                 if m.index == regex_pad.lastIndex
                     regex_pad.lastIndex++
 
-                pad = {}
-                pad['num'] = ''
-                if m[1] != '""'
-                    pad['num'] = m[1]
-                pad['type'] = m[2]
-                pad['shape'] = m[3]
-                pad['x'] = parseFloat(m[4])
-                pad['y'] = parseFloat(m[5])
-                pad['width'] = parseFloat(m[6])
-                pad['height'] = parseFloat(m[7])
-                pad['drill'] = parseFloat(m[8])
-                pad['layers'] = m[9].split(' ')
+                if m[1] == '""'
+                    num = ''
+                else
+                    num = m[1]
+                pad = {num: num, type: m[2], shape: m[3], x: parseFloat(m[4]), y: parseFloat(m[5]), width: parseFloat(m[6]), height: parseFloat(m[7]), drill: parseFloat(m[8]), layers: m[9].split(' ')}
 
                 update_dimensions(pad['x'] - pad['width'] / 2,
-                                  pad['y'] - pad['height'] / 2)
+                                pad['y'] - pad['height'] / 2)
                 update_dimensions(pad['x'] + pad['width'] / 2,
-                                  pad['y'] + pad['height'] / 2)
+                                pad['y'] + pad['height'] / 2)
 
                 pads.push(pad)
 
@@ -318,15 +306,18 @@ KiCad = (canvas, options = {}) ->
         console.log("DEBUG: found #{pads.length} pads")
 
         # calculate zoom factor
-        cw = canvas.width / 2
-        ch = canvas.height / 2
-        maxw = Math.max(Math.abs(left), Math.abs(right))
-        maxh = Math.max(Math.abs(top), Math.abs(bottom))
+        canvas_width = canvas.width / 2
+        canvas_height = canvas.height / 2
+        max_width = Math.max(Math.abs(left), Math.abs(right))
+        max_height = Math.max(Math.abs(top), Math.abs(bottom))
         if not zoom
-            zoom = Math.min((cw - 10) / maxw, (ch - 10) / maxh)
+            zoom = Math.min((canvas_width - 10) / max_width,
+                            (canvas_height - 10) / max_height)
+            default_zoom = zoom
 
         console.log("DEBUG: max dimensions: left=#{left}; right=#{right}; top=#{top}; bottom=#{bottom}")
         console.log("DEBUG: zoom: #{zoom}")
+        console.log("DEBUG: moved: #{move_x}x#{move_y}")
 
 
         # draw everything
@@ -334,27 +325,27 @@ KiCad = (canvas, options = {}) ->
 
         for fpline in fp_lines
             # translate coords
-            fpline['x1'] = fpline['x1'] * zoom + cw
-            fpline['y1'] = fpline['y1'] * zoom + ch
-            fpline['x2'] = fpline['x2'] * zoom + cw
-            fpline['y2'] = fpline['y2'] * zoom + ch
+            fpline['x1'] = fpline['x1'] * zoom + canvas_width + move_x
+            fpline['y1'] = fpline['y1'] * zoom + canvas_height + move_y
+            fpline['x2'] = fpline['x2'] * zoom + canvas_width + move_x
+            fpline['y2'] = fpline['y2'] * zoom + canvas_height + move_y
             fpline['width'] *= zoom
             draw_fpline(fpline)
 
         for fpcircle in fp_circles
             # translate coords
-            fpcircle['center_x'] = fpcircle['center_x'] * zoom + cw
-            fpcircle['center_y'] = fpcircle['center_y'] * zoom + ch
+            fpcircle['center_x'] = fpcircle['center_x'] * zoom + canvas_width + move_x
+            fpcircle['center_y'] = fpcircle['center_y'] * zoom + canvas_height + move_y
             fpcircle['radius'] *= zoom
             fpcircle['width'] *= zoom
             draw_fpcircle(fpcircle)
 
         for fparc in fp_arcs
             # translate coords
-            fparc['center_x'] = fparc['center_x'] * zoom + cw
-            fparc['center_y'] = fparc['center_y'] * zoom + ch
-            fparc['point_x'] = fparc['point_x'] * zoom + cw
-            fparc['point_y'] = fparc['point_y'] * zoom + ch
+            fparc['center_x'] = fparc['center_x'] * zoom + canvas_width + move_x
+            fparc['center_y'] = fparc['center_y'] * zoom + canvas_height + move_y
+            fparc['point_x'] = fparc['point_x'] * zoom + canvas_width + move_x
+            fparc['point_y'] = fparc['point_y'] * zoom + canvas_height + move_y
             fparc['width'] *= zoom
             fparc['radius'] *= zoom
             draw_fparc(fparc)
@@ -368,8 +359,8 @@ KiCad = (canvas, options = {}) ->
 
         for pad in pads
             # translate coords
-            pad['x'] = pad['x'] * zoom + cw
-            pad['y'] = pad['y'] * zoom + ch
+            pad['x'] = pad['x'] * zoom + canvas_width + move_x
+            pad['y'] = pad['y'] * zoom + canvas_height + move_y
             pad['width'] *= zoom
             pad['height'] *= zoom
             pad['drill'] *= zoom
@@ -383,9 +374,35 @@ KiCad = (canvas, options = {}) ->
         zoom = zoom + level
         draw_footprint()
 
+    this.move_up = (px) ->
+        move_y = move_y + px
+        draw_footprint()
+
+    this.move_down = (px) ->
+        move_y = move_y - px
+        draw_footprint()
+
+    this.move_left = (px) ->
+        move_x = move_x + px
+        draw_footprint()
+
+    this.move_right = (px) ->
+        move_x = move_x - px
+        draw_footprint()
+
+    this.reset = () ->
+        zoom = default_zoom
+        move_x = 0
+        move_y = 0
+        draw_footprint()
+
+    canvas.addEventListener('scroll', (event) ->
+        console.log(event))
+
     return this
 
 
+# some js voodoo you need because js is a giant pile of shit
 if typeof(define) != 'undefined'
     define 'kicad', [], () ->
         return KiCad
