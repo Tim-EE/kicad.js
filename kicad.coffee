@@ -205,9 +205,9 @@ KiCad = (canvas, options = {}) ->
             line = line.trim()
 
             regex_fpline = /\(fp_line \(start ([-.\d]*) ([-.\d]*)\) \(end ([-.\d]*) ([-.\d]*)\) \(layer ([.a-zA-Z]*)\) \(width ([-.\d]*)\)\)/g
-            while((m = regex_fpline.exec(line)) != null)
+            while (m = regex_fpline.exec(line)) != null
             # TODO: forgot what the next 2 lines do..
-                if (m.index == regex_fpline.lastIndex)
+                if m.index == regex_fpline.lastIndex
                     regex_fpline.lastIndex++
 
                 fp_line = {x1: parseFloat(m[1]), y1: parseFloat(m[2]), x2: parseFloat(m[3]), y2: parseFloat(m[4]), layer: m[5], width:parseFloat(m[6])}
@@ -218,8 +218,8 @@ KiCad = (canvas, options = {}) ->
                 fp_lines.push(fp_line)
 
             regex_fparc = /\(fp_arc \(start ([-.\d]*) ([-.\d]*)\) \(end ([-.\d]*) ([-.\d]*)\) \(angle ([-.\d]*)\) \(layer ([.a-zA-Z]*)\) \(width ([-.\d]*)\)\)/g
-            while((m = regex_fparc.exec(line)) != null)
-                if(m.index == regex_fparc.lastIndex)
+            while (m = regex_fparc.exec(line)) != null
+                if m.index == regex_fparc.lastIndex
                     regex_fparc.lastIndex++
 
                 radius = Math.sqrt(Math.pow(parseFloat(m[1]) - parseFloat(m[3]), 2) + Math.pow(parseFloat(m[2]) - parseFloat(m[4]), 2))
@@ -233,8 +233,8 @@ KiCad = (canvas, options = {}) ->
                 fp_arcs.push(fp_arc)
 
             regex_fpcircle = /\(fp_circle \(center ([-.\d]+) ([-.\d]+)\) \(end ([-.\d]+) ([-.\d]+)\) \(layer ([.\w]+)\) \(width ([.\d]+)\)\)/g
-            while((m = regex_fpcircle.exec(line)) != null)
-                if(m.index == regex_fpcircle.lastIndex)
+            while (m = regex_fpcircle.exec(line)) != null
+                if m.index == regex_fpcircle.lastIndex
                     regex_fpcircle.lastIndex++
 
                 x = parseFloat(m[3])
@@ -251,9 +251,9 @@ KiCad = (canvas, options = {}) ->
 
 
             regex_pad = /\(pad ([\d]*) ([_a-z]*) ([a-z]*) \(at ([-.\d]*) ([-.\d]*)\) \(size ([.\d]*) ([.\d]*)\) \(drill ([.\d]*)\) \(layers ([\w\d\s.*]*)\)\)/g
-            while((m = regex_pad.exec(line)) != null)
+            while (m = regex_pad.exec(line)) != null
                 # TODO: forgot what the next 2 lines do..
-                if (m.index == regex_pad.lastIndex)
+                if m.index == regex_pad.lastIndex
                     regex_pad.lastIndex++
 
                 if m[1] == '""'
@@ -268,6 +268,36 @@ KiCad = (canvas, options = {}) ->
                                 pad['y'] + pad['height'] / 2)
 
                 pads.push(pad)
+
+            regex_fptext = /\(fp_text\ (reference|value|user)\ (.)+\ \(at\ ([-.\d]+)\ ([-.\d]+)(\ [-.\d]+)?\)\ \(layer\ ([.\w\d])+\)/g
+            while (m = regex_fptext.exec(l)) != null
+                if m.index == regex_fptext.lastIndex
+                    regex_fptext.lastIndex++
+
+                fp_text = {}
+                fp_text['type'] = m[1]
+                fp_text['text'] = m[2]
+                fp_text['x'] = m[3]
+                fp_text['y'] = m[4]
+                if m[6]
+                    fp_text['degrees'] = m[5]
+                    fp_text['layer'] = m[6]
+                else
+                    fp_text['degrees'] = 0
+                    fp_text['layer'] = m[5]
+
+                update_dimensions(fp_text['x'], fp_text['y'])
+
+                fp_texts.push(fp_text)
+
+            regex_fptext_efxt = /\(effects\ \(font\ \(size\ ([.\d]+)\ ([.\d]+)\)\ \(thickness\ ([.\d]+)\)\)\)/g
+            while (m = regex_fptext_efx.exec(l)) != null
+                if m.index == regex_fptext_efx.lastIndex
+                    regex_fptext_efx.lastIndex++
+
+                fp_texts[fp_texts.length - 1]['width'] = m[1]
+                fp_texts[fp_texts.length - 1]['height'] = m[2]
+                fp_texts[fp_texts.length - 1]['thickness'] = m[3]
 
         console.log("DEBUG: found #{fp_lines.length} fp_lines")
         console.log("DEBUG: found #{fp_circles.length} fp_circles")
