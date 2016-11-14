@@ -1,17 +1,39 @@
 <!DOCTYPE html>
 <html>
     <head>
-         <meta charset="UTF-8" />
+        <meta charset="UTF-8" />
         <title>kicad.js</title>
+        <link rel="stylesheet" href="css/font-awesome.min.css">
+        <style>
+button {
+    width: 3em;
+    height: 2em;
+}
+        </style>
     </head>
     <body>
         <h1><img src="logo.png" /></h1>
-        <canvas id="example1" data-footprint="/Teensy3.x_LC.kicad_mod" width="480" height="320"></canvas>
-        <canvas id="example2" data-footprint="/Cherry_MX_Switch.kicad_mod" width="480" height="320"></canvas>
-        <button id="zoomin">zoom in</button>
-        <button id="zoomout">zoom out</button>
+        <canvas id="example1" data-footprint="/Teensy30_31_32_LC.kicad_mod" width="800" height="600"></canvas>
+        <canvas id="example2" data-footprint="/Teensy35_36.kicad_mod" width="800" height="600"></canvas>
+        <table>
+            <tr>
+                <td><button id="zoomin"><i class="fa fa-search-plus" aria-hidden="true"></i></button></td>
+                <td><button id="moveup"><i class="fa fa-chevron-up" aria-hidden="true"></i></button></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td><button id="moveleft"><i class="fa fa-chevron-left" aria-hidden="true"></i></button></td>
+                <td><button id="reset"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></button></td>
+                <td><button id="moveright"><i class="fa fa-chevron-right" aria-hidden="true"></i></button></td>
+            </tr>
+            <tr>
+                <td><button id="zoomout"><i class="fa fa-search-minus" aria-hidden="true"></i></button></td>
+                <td><button id="movedown"><i class="fa fa-chevron-down" aria-hidden="true"></i></button></td>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
 
-        <script src="jquery-2.1.4.min.js"></script>
+        <script src="js/jquery-3.1.1.min.js"></script>
         <script src="kicad.js"></script>
 		<script>
             (() => {
@@ -32,11 +54,28 @@
                 Promise.resolve($.get(canvas2.data('footprint'))).then(data => {
                     example2.render(data);
                 });
+
                 $("#zoomin").on('click', () => {
-                    example2.zoom(+1);
+                    example1.zoom(+1);
                 });
                 $("#zoomout").on('click', () => {
-                    example2.zoom(-1);
+                    example1.zoom(-1);
+                });
+
+                $("#moveup").on('click', () => {
+                    example1.move_up(10);
+                });
+                $("#movedown").on('click', () => {
+                    example1.move_down(10);
+                });
+                $("#moveleft").on('click', () => {
+                    example1.move_left(10);
+                });
+                $("#moveright").on('click', () => {
+                    example1.move_right(10);
+                });
+                $("#reset").on('click', () => {
+                    example1.reset();
                 });
             })();
         </script>
