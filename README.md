@@ -4,14 +4,14 @@ kicad.js is a footprint viewer for [KiCAD](http://kicad-pcb.org/) footprint file
 
 ## Compilation
 
-I'm unable to code in JavaScript without screaming every few minutes so I did
-kicad.js in coffeescript. You can compile it to JavaScript by installing
-coffeescipt. it should be available in your standard distribution packages or
-at [coffeescript.org](http://coffeescript.org/).
+I'm unable to code in Javascript without screaming at my screen every few minutes so I made
+kicad.js using coffeescript. This is a tiny bit less shitty and makes me screen a bit less.
+You can compile the code to Javascript by installing coffeescipt. It should be available in
+your standard distribution packages or at [coffeescript.org](http://coffeescript.org/).
 
 ## Installation
 
-Just put kicad.js where you usually put your JavaScript files.
+Just put kicad.js where you usually put your Javascript files.
 
 ## Usage
 
@@ -20,14 +20,14 @@ Here's a simple snippet that shows how to use kicad.js:
 ```html
 <canvas id="kicad" data-footprint="/Teensy3.x_LC.kicad_mod" width="480" height="320"></canvas>
 
-<script src="jquery-2.1.4.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src="kicad.js"></script>
 <script>
-	(() => {
-		"use strict";
+    (() => {
+        "use strict";
 
-		var options = {
-        	grid: 1.27
+        var options = {
+            grid: 1.27
         };
 
         var canvas = $("#kicad");
@@ -62,15 +62,15 @@ var canvas = $("#kicad");
 ```
 
 You can then create a KiCad object and attach it to the canvas with your set of
-options. note that jQuery always returns a list of found elements, so you need
+options. Note that jQuery always returns a list of found elements, so you need
 to give it the first item in the list.
 
 ```js
 var kicadviewer = new KiCad(canvas[0], options);
 ```
 
-Finally download the footprint file for example with an AJAX call and use the
-`render(data)` function of your KiCad object to render the footprint.
+Finally download the footprint file for example with something like an AJAX call
+and use the `render(data)` function of your KiCad object to render the footprint.
 
 ```js
 Promise.resolve($.get(canvas.data('footprint'))).then(data => {
@@ -81,4 +81,3 @@ Promise.resolve($.get(canvas.data('footprint'))).then(data => {
 If everything works it should look like this:
 
 ![screenshot](https://github.com/xengi/kicad.js/raw/master/screenshot.png "Screenshot")
-
