@@ -1,6 +1,6 @@
 {
   "name": "kicad-footprint-viewer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Rendering KiCAD footprints in a HTML canvas.",
   "main": "index.js",
   "scripts": {
