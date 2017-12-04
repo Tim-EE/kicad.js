@@ -1,12 +1,16 @@
 {
   "name": "kicad-footprint-viewer",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Rendering KiCAD footprints in a HTML canvas.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
   },
-  "repository": "git+https://github.com/XenGi/kicad.js.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XenGi/kicad.js.git"
+  },
   "keywords": [
     "kicad"
   ],
@@ -15,5 +19,12 @@
   "bugs": {
     "url": "https://github.com/XenGi/kicad.js/issues"
   },
-  "homepage": "https://github.com/XenGi/kicad.js#readme"
+  "homepage": "https://github.com/XenGi/kicad.js#readme",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "^3.9.1"
+  }
 }
