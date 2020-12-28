@@ -1,59 +1,94 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="UTF-8" />
+         <meta charset="UTF-8" />
         <title>kicad.js</title>
-        <link rel="stylesheet" href="css/font-awesome.min.css">
-        <style>
-button {
-    width: 3em;
-    height: 2em;
-}
+		<style>
+			button.nav
+			{
+				width: 3em;
+				height: 2em;
+			}
         </style>
     </head>
     <body>
-        <h1><img src="logo.png" /></h1>
-        <canvas id="example1" data-footprint="/Teensy30_31_32_LC.kicad_mod" width="800" height="600"></canvas>
-        <canvas id="example2" data-footprint="/Teensy35_36.kicad_mod" width="800" height="600"></canvas>
-        <table>
+        <h1><img src="logo.png" style="height:50px"/></h1>
+		<div><button id="process">Update Footprint</button></div>
+		<table style="width:100%;"><tr><td style="width: 50%; height: 320px;"><textarea id="content" style="width:100%;height:100%">
+(module SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm (layer F.Cu) (tedit 5A3EAE8E)
+  (descr "SMD Solder Jumper, 1x1.5mm, rounded Pads, 0.3mm gap, open")
+  (tags "solder jumper open")
+  (attr virtual)
+  (fp_text reference REF** (at 0 -1.8) (layer F.SilkS)
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text value SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm (at 0 1.9) (layer F.Fab)
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_arc (start 0.7 -0.3) (end 1.4 -0.3) (angle -90) (layer F.SilkS) (width 0.12))
+  (fp_arc (start 0.7 0.3) (end 0.7 1) (angle -90) (layer F.SilkS) (width 0.12))
+  (fp_arc (start -0.7 0.3) (end -1.4 0.3) (angle -90) (layer F.SilkS) (width 0.12))
+  (fp_arc (start -0.7 -0.3) (end -0.7 -1) (angle -90) (layer F.SilkS) (width 0.12))
+  (fp_line (start -1.4 0.3) (end -1.4 -0.3) (layer F.SilkS) (width 0.12))
+  (fp_line (start 0.7 1) (end -0.7 1) (layer F.SilkS) (width 0.12))
+  (fp_line (start 1.4 -0.3) (end 1.4 0.3) (layer F.SilkS) (width 0.12))
+  (fp_line (start -0.7 -1) (end 0.7 -1) (layer F.SilkS) (width 0.12))
+  (fp_line (start -1.65 -1.25) (end 1.65 -1.25) (layer F.CrtYd) (width 0.05))
+  (fp_line (start -1.65 -1.25) (end -1.65 1.25) (layer F.CrtYd) (width 0.05))
+  (fp_line (start 1.65 1.25) (end 1.65 -1.25) (layer F.CrtYd) (width 0.05))
+  (fp_line (start 1.65 1.25) (end -1.65 1.25) (layer F.CrtYd) (width 0.05))
+  (pad 2 smd roundrect (at 0.65 0) (size 1 1.5) (layers F.Cu F.Mask)(roundrect_rratio 0.5))
+  (pad 1 smd roundrect (at -0.65 0) (size 1 1.5) (layers F.Cu F.Mask)(roundrect_rratio 0.5))
+ )
+</textarea></td>
+
+        <td style="width: 50%; height: 320px;"><canvas id="example1" data-footprint="file://C:\Temp\kiTest\mod_test\Antenna_915MHz_3.kicad_mod" width="480" height="320"></canvas>
+        </td></tr><tr><td><div id="location-text"></td><td>
+		<table>
             <tr>
-                <td><button id="zoomin"><i class="fa fa-search-plus" aria-hidden="true"></i></button></td>
-                <td><button id="moveup"><i class="fa fa-chevron-up" aria-hidden="true"></i></button></td>
+                <td><button class="nav" id="zoomin">+</button></td>
+                <td><button class="nav" id="moveup">&#8593;</button></td>
                 <td>&nbsp;</td>
             </tr>
             <tr>
-                <td><button id="moveleft"><i class="fa fa-chevron-left" aria-hidden="true"></i></button></td>
-                <td><button id="reset"><i class="fa fa-dot-circle-o" aria-hidden="true"></i></button></td>
-                <td><button id="moveright"><i class="fa fa-chevron-right" aria-hidden="true"></i></button></td>
+                <td><button class="nav" id="moveleft">&#8592;</i></button></td>
+                <td><button class="nav" id="reset">&#8634; </button></td>
+                <td><button class="nav" id="moveright">&#8594;</button></td>
             </tr>
             <tr>
-                <td><button id="zoomout"><i class="fa fa-search-minus" aria-hidden="true"></i></button></td>
-                <td><button id="movedown"><i class="fa fa-chevron-down" aria-hidden="true"></i></button></td>
+                <td><button class="nav" id="zoomout">-</button></td>
+                <td><button class="nav" id="movedown">&#8595;</button></td>
                 <td>&nbsp;</td>
             </tr>
         </table>
+		</td></tr></table>
 
-        <script src="js/jquery-3.1.1.min.js"></script>
+		<script src="jquery-3.1.1.min.js"></script>
+		<script src="parseSExpr.js"></script>
         <script src="kicad.js"></script>
 		<script>
+			var example1;
+			var originPoint;
             (() => {
                 "use strict";
 
                 var options = {
-                    grid: 1.27
+                    grid: 1.27, // in mm
+					showPadNames: true
                 };
 
-                var canvas1 = $("#example1");
-                var example1 = new KiCad(canvas1[0], options);
-                Promise.resolve($.get(canvas1.data('footprint'))).then(data => {
-                    example1.render(data);
+                var canvas = $("#example1");
+
+				//$("#content").load(canvas1.data('footprint'));
+				//[Exception... "The URI scheme corresponds to an unknown protocol handler"  nsresult: "0x804b0012 (NS_ERROR_UNKNOWN_PROTOCOL)"  location: "JS frame :: file:///C:/Temp/kiTest/kicad.js-0.2.0/jquery-3.1.1.min.js :: .send :: line 4"  data: no]
+
+				//var example1;
+				$("#process").on('click', () => {
+                    example1 = new KiCad(canvas[0], options);
+					example1.render($("textarea").val());
+					//$("textarea").val(example1.parsed_data);
                 });
 
-                var canvas2 = $("#example2");
-                var example2 = new KiCad(canvas2[0]);
-                Promise.resolve($.get(canvas2.data('footprint'))).then(data => {
-                    example2.render(data);
-                });
 
                 $("#zoomin").on('click', () => {
                     example1.zoom(+1);
@@ -77,8 +112,198 @@ button {
                 $("#reset").on('click', () => {
                     example1.reset();
                 });
+
+
             })();
+
+			var readout = document.getElementById('location-text');
+			var canvas = document.getElementById('example1');
+
+			var is_mouse_down = false;
+			var mouse_pos = null;
+
+			/*canvas.onwheel = function (e)
+			{
+
+				example1.zoom(e.wheelDelta);
+			};*/
+			if (canvas.addEventListener)
+			{
+					/** DOMMouseScroll is for mozilla. */
+					canvas.addEventListener('DOMMouseScroll', wheel, false);
+			}
+			/** IE/Opera. */
+			canvas.onmousewheel = document.onmousewheel = wheel;
+			// canvas.onkeydown = document.onkeydown = keyDownHandler;
+
+
+
+			function wheel(event)
+			{
+                var delta = 0;
+                if (!event) /* For IE. */
+                        event = window.event;
+                if (event.wheelDelta) { /* IE/Opera. */
+                        delta = event.wheelDelta/120;
+                } else if (event.detail) { /** Mozilla case. */
+                        /** In Mozilla, sign of delta is different than in IE.
+                         * Also, delta is multiple of 3.
+                         */
+                        delta = -event.detail/3;
+                }
+
+				example1.zoom(delta/2);
+
+
+        curr_mouse_pos = windowToCanvas(canvas, event.clientX, event.clientY);
+		if (mouse_pos != null)
+		{
+		var mX = mouse_pos.x;
+        var mY = mouse_pos.y;
+        var magnitudeX = Math.abs(mX - curr_mouse_pos.x);
+        var magnitudeY = Math.abs(mY - curr_mouse_pos.y) ;
+
+
+
+        //if (mX - curr_mouse_pos.x < 0)
+          // example1.move_right(magnitudeX);
+          example1.move_right((curr_mouse_pos.x - mX) / example1.getZoom());
+        //else
+          // example1.move_left(magnitudeX);
+        //  example1.move_left(1 / example1.getZoom());
+
+        //if (mY - curr_mouse_pos.y < 0)
+          // example1.move_down(magnitudeY);
+          example1.move_down((curr_mouse_pos.y - mY) / example1.getZoom());
+        //else
+          // example1.move_up(magnitudeY);
+          //example1.move_up(1 / example1.getZoom());
+	  }
+
+
+				if (event.preventDefault)
+				{
+					event.preventDefault();
+
+				}
+				event.returnValue = false;
+			}
+			canvas.onmousedown = function (e)
+			{
+				is_mouse_down = true;
+				mouse_pos = windowToCanvas(canvas, e.clientX, e.clientY);
+			};
+			canvas.onmouseup = function (e)
+			{
+				is_mouse_down = false;
+			};
+
+			canvas.onmousemove = function (e)
+			{
+				var loc = windowToCanvas(canvas, e.clientX, e.clientY);
+
+				updateReadout(loc.x, loc.y);
+
+				if (is_mouse_down)
+				{
+					var mX = mouse_pos.x;
+					var mY = mouse_pos.y;
+					var magnitudeX = Math.abs(mX - loc.x);
+					var magnitudeY = Math.abs(mY - loc.y) ;
+
+					if (mX - loc.x > 0)
+						example1.move_right(magnitudeX);
+					else
+						example1.move_left(magnitudeX);
+
+					if (mY - loc.y > 0)
+						example1.move_down(magnitudeY);
+					else
+						example1.move_up(magnitudeY);
+
+					mouse_pos = windowToCanvas(canvas, e.clientX, e.clientY);
+				}
+
+
+			};
+
+			var previousText = "";
+			function updateReadout(x, y)
+			{
+				var zoomLevel = example1.getZoom();
+
+
+
+				var xLoc = Math.round((((x.toFixed(0) - (canvas.width / 2)  - example1.getX()) / zoomLevel)) * 100) / 100 ;
+				var yLoc = Math.round((((y.toFixed(0) - (canvas.height / 2)  - example1.getY()) / zoomLevel)) * 100) / 100 ;
+
+				//readout.innerText = '(' + xLoc + ', ' + yLoc + ')\n' + zoomLevel ;
+
+				var ctx = canvas.getContext("2d");
+				ctx.save();
+				const fontHeight = 12;
+				ctx.font = fontHeight + "px Arial";
+				ctx.textAlign = "left";
+				var textX = 15;
+				var textY = canvas.height - fontHeight;
+				ctx.fillStyle = '#000000';
+				//ctx.fillText(previousText, textX, textY);
+				var prevWidth = ctx.measureText(previousText).width
+				previousText = '(' + xLoc + ', ' + yLoc + ')';
+				var clearWidth = Math.max(prevWidth,ctx.measureText(previousText).width);
+				ctx.fillRect(textX,textY - (fontHeight/2), clearWidth, fontHeight);
+
+				ctx.fillStyle = '#DfDfDf';
+				ctx.fillText(previousText,textX,textY);
+			    ctx.restore();
+			}
+
+			var previousPoint = [0,0];
+			var firstMeasurePoint = true;
+			function measureLength(x, y)
+			{
+				var zoomLevel = example1.getZoom();
+
+
+				var xLoc = Math.round((((x.toFixed(0) - (canvas.width / 2)  - example1.getX()) / zoomLevel)) * 100) / 100 ;
+				var yLoc = Math.round((((y.toFixed(0) - (canvas.height / 2)  - example1.getY()) / zoomLevel)) * 100) / 100 ;
+
+				//readout.innerText = '(' + xLoc + ', ' + yLoc + ')\n' + zoomLevel ;
+
+				if (firstMeasurePoint)
+				{
+					previousPoint = [xLoc,yLoc];
+				}
+				else
+				{
+					var ctx = canvas.getContext("2d");
+					ctx.save();
+					const fontHeight = 12;
+					ctx.font = fontHeight + "px Arial";
+					ctx.textAlign = "left";
+					var textX = 15;
+					var textY = canvas.height - fontHeight;
+					ctx.fillStyle = '#000000';
+					//ctx.fillText(previousText, textX, textY);
+					var prevWidth = ctx.measureText(previousText).width
+					previousText = '(' + xLoc + ', ' + yLoc + ')';
+					var clearWidth = Math.max(prevWidth,ctx.measureText(previousText).width);
+					ctx.fillRect(textX,textY - (fontHeight/2), clearWidth, fontHeight);
+
+					ctx.fillStyle = '#DfDfDf';
+					ctx.fillText(previousText,textX,textY);
+				    ctx.restore();
+				}
+			}
+
+			function windowToCanvas(canvas, x, y) {
+			   var bbox = canvas.getBoundingClientRect();
+
+			   return { x: x - bbox.left * (canvas.width  / bbox.width),
+						y: y - bbox.top  * (canvas.height / bbox.height)
+					  };
+			}
+
         </script>
     </body>
 </html>
-
